@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.WithDto.PostWithCommentariesDto;
 import com.example.demo.dto.container.PostContainerDto;
 import com.example.demo.dto.Dto.PostDto;
+import com.example.demo.dto.pageResponse.PageResponse;
 import com.example.demo.dto.request.PostRequest.CreatePostRequest;
 import com.example.demo.dto.request.PostRequest.UpdatePostRequest;
 import com.example.demo.entity.Post;
@@ -30,8 +31,8 @@ public class PostController {
         this.postService = postService;
     }
     @GetMapping("/posts")
-    public PostContainerDto findAll(){
-        return postService.findAll();
+    public ResponseEntity<PageResponse<PostDto>> findAll(@RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
+        return ResponseEntity.ok(postService.findAll(page,size));
     }
     @GetMapping("/posts/{id}")
     public ResponseEntity<PostWithCommentariesDto> findById(@PathVariable int id){

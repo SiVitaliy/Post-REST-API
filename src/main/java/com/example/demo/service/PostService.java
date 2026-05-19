@@ -4,6 +4,7 @@ import com.example.demo.dto.WithDto.PostWithCommentariesDto;
 import com.example.demo.dto.container.CommentaryContainerDto;
 import com.example.demo.dto.container.PostContainerDto;
 import com.example.demo.dto.Dto.PostDto;
+import com.example.demo.dto.pageResponse.PageResponse;
 import com.example.demo.dto.request.PostRequest.CreatePostRequest;
 import com.example.demo.dto.request.PostRequest.UpdatePostRequest;
 import com.example.demo.entity.Post;
@@ -14,6 +15,10 @@ import com.example.demo.repository.CommentaryRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +36,8 @@ public class PostService {
     private final CommentaryRepository commentaryRepository;
 
     private final CommentaryMapper commentaryMapper;
-
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 50;
     @Autowired
     public PostService(PostMapper postMapper, PostRepository postRepository, UserRepository userRepository, FileStorageService fileStorageService, CommentaryRepository commentaryRepository, CommentaryMapper commentaryMapper) {
         this.postMapper = postMapper;
@@ -42,13 +48,28 @@ public class PostService {
         this.commentaryMapper = commentaryMapper;
     }
 
-    public PostContainerDto findAll(){
-        List<PostDto> posts= postRepository.findAllWithImages().stream().map(postMapper::toDto).collect(Collectors.toList());
-        return new PostContainerDto(posts);
+    @Transactional(readOnly = true)
+    public PageResponse<PostDto> findAll(int page, int size){
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
+
+        Pageable pageable = PageRequest.of( safePage,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "creationDate")
+        );
+        Page<Post> posts= postRepository.findAllWithAuthor(pageable);
+
+
+
+        return new PageResponse<>(
+                posts.getContent().stream().map(postMapper::toDto).collect(Collectors.toList()),
+                posts.getNumber(), posts.getSize(),
+                posts.getTotalElements(),
+                posts.getTotalPages(),
+                posts.hasNext(),posts.hasPrevious());
     }
     public PostWithCommentariesDto findPostWithCommentariesById(int id){
         Post post =postRepository.findByIdWithImages(id).orElseThrow(()->new IllegalArgumentException("Post with id "+id+" not found"));
-        System.out.println("!!"+post.getImages().toString());
         PostDto postDto = postMapper.toDto(post);
         System.out.println(postDto);
         CommentaryContainerDto commentaries= commentaryMapper.toContainerDto(commentaryRepository.findByPostIdOrderByCreationDate(id));

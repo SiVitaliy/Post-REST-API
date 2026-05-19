@@ -15,11 +15,11 @@ public class UserDetailsServiceConfiguration {
         this.userService = userService;
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            return userService.findByEmail(username);
-            // ↑ возвращаем твоего User (он же UserDetails)
-        };
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        return username -> {
+//            return userService.findByEmail(username);
+//            // ↑ возвращаем твоего User (он же UserDetails)
+//        };
+    //}
 }

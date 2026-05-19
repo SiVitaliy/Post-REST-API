@@ -2,6 +2,8 @@ package com.example.demo.repository;
 
 import com.example.demo.entity.Post;
 import com.example.demo.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,7 +23,13 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     Optional<Integer> findAuthorIdByPostId(@Param("postId") int id);
     @Query("SELECT DISTINCT p FROM Post p LEFT JOIN FETCH p.images WHERE p.id = :id")
     Optional<Post> findByIdWithImages(@Param("id") int id);
-    @Query("SELECT DISTINCT p FROM Post p LEFT JOIN FETCH p.images")
-    List<Post> findAllWithImages();
+
+
+    @Query("""
+       select p
+       from Post p
+       join fetch p.author
+   """)
+    Page<Post> findAllWithAuthor(Pageable pageable);
 
 }
