@@ -8,6 +8,7 @@ import com.example.demo.dto.request.PostRequest.CreatePostRequest;
 import com.example.demo.dto.request.PostRequest.UpdatePostRequest;
 import com.example.demo.entity.User;
 import com.example.demo.service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,12 +52,12 @@ public class PostController {
 
 
     @PostMapping("/posts")
-    public ResponseEntity<PostDto> save(@RequestBody CreatePostRequest request, @AuthenticationPrincipal User user){
+    public ResponseEntity<PostDto> save(@RequestBody @Valid CreatePostRequest request, @AuthenticationPrincipal User user){
         return ResponseEntity.ok(postService.save(request,user));
     }
 
     @PutMapping("/posts/{postId}")
-    public ResponseEntity<PostDto> update(@PathVariable int postId, @RequestBody  UpdatePostRequest request, @AuthenticationPrincipal User user){
+    public ResponseEntity<PostDto> update(@PathVariable int postId, @RequestBody @Valid  UpdatePostRequest request, @AuthenticationPrincipal User user){
 
 
         if (postService.userIsAuthor(postId,user)){

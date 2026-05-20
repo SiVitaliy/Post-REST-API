@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     @Query("SELECT u FROM User u WHERE LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%'))")
     List<User> findUsersWithSearch(String search);
+
+    boolean existsByEmail(String email);
 }

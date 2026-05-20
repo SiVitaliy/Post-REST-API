@@ -6,10 +6,12 @@ import com.example.demo.dto.request.UserRequest.LoginUserRequest;
 import com.example.demo.dto.request.UserRequest.RegisterUserRequest;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<JwtResponseDto> registration(@RequestBody RegisterUserRequest registerUserRequest) {
+    public ResponseEntity<JwtResponseDto> registration(@RequestBody @Valid RegisterUserRequest registerUserRequest) {
         userService.register(registerUserRequest);
         String token = jwtUtil.generateToken(registerUserRequest.email());
         return ResponseEntity.status(HttpStatus.CREATED).body(new JwtResponseDto(token));
@@ -37,10 +39,15 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponseDto> login(@RequestBody LoginUserRequest loginUserRequest) {
-        User user = userService.findByEmail(loginUserRequest.email());
+        User user = null;
+        try {
+            user = userService.findByEmail(loginUserRequest.email());
+        } catch (IllegalArgumentException e) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
 
         if (!passwordEncoder.matches(loginUserRequest.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new BadCredentialsException("Invalid email or password");
         }
 
         String token = jwtUtil.generateToken(loginUserRequest.email());

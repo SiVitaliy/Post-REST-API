@@ -10,6 +10,7 @@ import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.FileStorageService;
 import com.example.demo.service.PostService;
 import com.example.demo.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,12 +77,12 @@ public class UserController {
         PostContainerDto postContainerDto = postService.findAllByAuthor(user);
         return ResponseEntity.ok(new UserWithPostsDto(userDto,postContainerDto));
     }
-    @GetMapping("/user/{email}")
-    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
-        User user = userService.findByEmail(email);
-        UserDto userDto = userMapper.toDto(user);
-        return ResponseEntity.ok(userDto);
-    }
+//    @GetMapping("/user/{email}")
+//    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
+//        User user = userService.findByEmail(email);
+//        UserDto userDto = userMapper.toDto(user);
+//        return ResponseEntity.ok(userDto);
+//    }
 
 
     @PostMapping("/me")
@@ -93,9 +94,11 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public  ResponseEntity<UserDto> updateCurrentUser(@RequestBody UpdateUserRequest request,
+    public  ResponseEntity<UserDto> updateCurrentUser(@RequestBody @Valid UpdateUserRequest request,
                                                       @AuthenticationPrincipal User user){
-        System.out.println("comtroller");
+
+
+
         return ResponseEntity.ok(userService.updateUser(user,request));
     }
     @DeleteMapping("/me")

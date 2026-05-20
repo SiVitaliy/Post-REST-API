@@ -6,6 +6,7 @@ import com.example.demo.dto.request.CommentaryRequest.UpdateCommentaryRequest;
 import com.example.demo.dto.request.PostRequest.UpdatePostRequest;
 import com.example.demo.entity.User;
 import com.example.demo.service.CommentaryService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,13 +28,13 @@ public class CommentaryController {
 
 
     @PostMapping("/posts/{postId}")
-    public ResponseEntity<CommentaryDto> save(@PathVariable int postId, @RequestBody CreateCommentaryRequest request, @AuthenticationPrincipal User user){
+    public ResponseEntity<CommentaryDto> save(@PathVariable int postId, @RequestBody @Valid CreateCommentaryRequest request, @AuthenticationPrincipal User user){
 
         return ResponseEntity.ok(commentaryService.save(postId,request,user));
     }
 
     @PutMapping("/commentaries/{id}")
-    public ResponseEntity<CommentaryDto> update(@PathVariable int id, @RequestBody UpdateCommentaryRequest request){
+    public ResponseEntity<CommentaryDto> update(@PathVariable int id, @RequestBody @Valid UpdateCommentaryRequest request){
         return ResponseEntity.ok(commentaryService.update(id,request));
     }
 

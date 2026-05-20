@@ -31,7 +31,10 @@ public interface PostMapper {
     Post toEntity(@MappingTarget Post post, UpdatePostRequest request);
 
 
-    @Mapping(target = "postDto", source = "postDto")
-    @Mapping(target = "commentaryContainerDto", source = "commentaries")
-    PostWithCommentariesDto toPostWithCommentariesDto(PostDto postDto, CommentaryContainerDto commentaries);
+//    @Mapping(target = "postDto", source = "postDto")
+//    @Mapping(target = "commentaryContainerDto", source = "commentaries")
+//    PostWithCommentariesDto toPostWithCommentariesDto(PostDto postDto, CommentaryContainerDto commentaries);
+//
+
+
 }

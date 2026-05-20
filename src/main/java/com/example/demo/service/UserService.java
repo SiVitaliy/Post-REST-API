@@ -7,11 +7,14 @@ import com.example.demo.dto.request.UserRequest.UpdateUserRequest;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.util.EmailAlreadyExistsException;
+import jakarta.validation.ValidationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -40,6 +43,9 @@ public class UserService {
     }
 
     public User register(RegisterUserRequest registerUserRequest) {
+        if (userRepository.existsByEmail(registerUserRequest.email())) {
+            throw new EmailAlreadyExistsException("Пользователь с такой почтой уже существует");
+        }
         User user = new User();
         user.setFullName(registerUserRequest.fullName());
         user.setEmail(registerUserRequest.email());
@@ -50,7 +56,13 @@ public class UserService {
     }
 
     public UserDto updateUser(User user, UpdateUserRequest request) {
-        System.out.println("update");
+        if (!user.getEmail().equals(request.email()) &&userRepository.existsByEmail(request.email())) {
+            throw new EmailAlreadyExistsException("Пользователь с такой почтой уже существует");
+        }
+        if (request.yearOfBirth() != null
+                && request.yearOfBirth().isBefore(LocalDate.now().minusYears(120))) {
+            throw new ValidationException("Дата рождения выглядит некорректной");
+        }
         return userMapper.toDto(userRepository.save(userMapper.toEntity(user,request)));
     }
 
