@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.Dto.CommentaryDto;
 import com.example.demo.dto.WithDto.PostWithCommentariesDto;
 import com.example.demo.dto.container.CommentaryContainerDto;
 import com.example.demo.dto.container.PostContainerDto;
@@ -7,6 +8,7 @@ import com.example.demo.dto.Dto.PostDto;
 import com.example.demo.dto.pageResponse.PageResponse;
 import com.example.demo.dto.request.PostRequest.CreatePostRequest;
 import com.example.demo.dto.request.PostRequest.UpdatePostRequest;
+import com.example.demo.entity.Commentary;
 import com.example.demo.entity.Post;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.CommentaryMapper;
@@ -68,12 +70,25 @@ public class PostService {
                 posts.getTotalPages(),
                 posts.hasNext(),posts.hasPrevious());
     }
-    public PostWithCommentariesDto findPostWithCommentariesById(int id){
+    public PostWithCommentariesDto findPostWithCommentariesById(int id,int commentPage,int commentSize){
+        int safePage = Math.max(commentPage, 0);
+        int safeSize = commentSize <= 0 ? DEFAULT_PAGE_SIZE : Math.min( commentSize, MAX_PAGE_SIZE);
         Post post =postRepository.findByIdWithImages(id).orElseThrow(()->new IllegalArgumentException("Post with id "+id+" not found"));
         PostDto postDto = postMapper.toDto(post);
-        System.out.println(postDto);
-        CommentaryContainerDto commentaries= commentaryMapper.toContainerDto(commentaryRepository.findByPostIdOrderByCreationDate(id));
-          return postMapper.toPostWithCommentariesDto(postDto,commentaries);
+
+        Pageable pageable = PageRequest.of(safePage,safeSize, Sort.by(Sort.Direction.DESC, "creationDate"));
+        Page<Commentary> commentaries = commentaryRepository.findByPostIdOrderByCreationDate(id, pageable);
+
+
+        PageResponse<CommentaryDto> commentaryPage =  new PageResponse<>(
+                commentaries.getContent().stream().map(commentaryMapper::toDto).collect(Collectors.toList()),
+                commentaries.getNumber(),commentaries.getSize(),
+                commentaries.getTotalElements(),
+                commentaries.getTotalPages(),
+                commentaries.hasNext(),commentaries.hasPrevious()
+        );
+        return new PostWithCommentariesDto(postDto,commentaryPage);
+
     }
     public Post findById(int id){
         return postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("Post with id "+id+" not found"));

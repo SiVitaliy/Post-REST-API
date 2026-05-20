@@ -28,8 +28,8 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     @Query("""
        select p
        from Post p
-       join fetch p.author
-   """)
+       left join fetch p.author     
+   """)//left чтобы при удалении автора не удалялись посты
     Page<Post> findAllWithAuthor(Pageable pageable);
 
 }

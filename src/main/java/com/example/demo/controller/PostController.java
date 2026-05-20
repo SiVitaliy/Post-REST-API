@@ -1,18 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.WithDto.PostWithCommentariesDto;
-import com.example.demo.dto.container.PostContainerDto;
+import com.example.demo.dto.Dto.CommentaryDto;
 import com.example.demo.dto.Dto.PostDto;
+import com.example.demo.dto.WithDto.PostWithCommentariesDto;
 import com.example.demo.dto.pageResponse.PageResponse;
 import com.example.demo.dto.request.PostRequest.CreatePostRequest;
 import com.example.demo.dto.request.PostRequest.UpdatePostRequest;
-import com.example.demo.entity.Post;
 import com.example.demo.entity.User;
 import com.example.demo.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +32,11 @@ public class PostController {
         return ResponseEntity.ok(postService.findAll(page,size));
     }
     @GetMapping("/posts/{id}")
-    public ResponseEntity<PostWithCommentariesDto> findById(@PathVariable int id){
+    public ResponseEntity<PostWithCommentariesDto> findById(@RequestParam(defaultValue = "0") int commentPage,
+                                                            @RequestParam(defaultValue = "10") int commentSize,
+                                                            @PathVariable int id){
 
-        return ResponseEntity.ok(postService.findPostWithCommentariesById(id));
+        return ResponseEntity.ok(postService.findPostWithCommentariesById(id,commentPage,commentSize));
     }
     @PostMapping("/posts/{postId}/images")
     public ResponseEntity<PostDto> addImages(@RequestParam List<MultipartFile> images,
