@@ -21,7 +21,7 @@ public class ImageController {
 
     @GetMapping("/uploads/posts/{id}/{filename}")
     public ResponseEntity<Resource> getImage(@PathVariable int id,@PathVariable String filename) {
-        System.out.println("!!!!!!!!!!!!!!");
+
         Resource resource = fileStorageService.loadImage(id,filename);
 
         return ResponseEntity.ok()
@@ -31,7 +31,7 @@ public class ImageController {
 
     @GetMapping("/uploads/profilePictures/{filename}")
     public ResponseEntity<Resource> getAvatar(@PathVariable String filename) {
-        System.out.println("!!!!!!!!!!!!!!");
+
         Resource resource = fileStorageService.loadProfilePicture(filename);
 
         return ResponseEntity.ok()

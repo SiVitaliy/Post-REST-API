@@ -1,18 +1,18 @@
 package com.example.demo.controller;
 
+import com.example.demo.config.JwtUtil;
+import com.example.demo.dto.Dto.JwtResponseDto;
 import com.example.demo.dto.Dto.UserDto;
 import com.example.demo.dto.WithDto.UserWithPostsDto;
+import com.example.demo.dto.WithDto.UserWithTokenDto;
 import com.example.demo.dto.container.PostContainerDto;
 import com.example.demo.dto.container.UserContainerDto;
 import com.example.demo.dto.request.UserRequest.UpdateUserRequest;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.service.FileStorageService;
 import com.example.demo.service.PostService;
 import com.example.demo.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,14 +25,15 @@ public class UserController {
     private final UserService userService;
     private final PostService postService;
     private final UserMapper userMapper;
+    private final JwtUtil jwtUtil;
 
-
-    public UserController(UserService userService, PostService postService, UserMapper userMapper) {
+    public UserController(UserService userService, PostService postService, UserMapper userMapper, JwtUtil jwtUtil) {
         this.userService = userService;
         this.postService = postService;
 
         this.userMapper = userMapper;
 
+        this.jwtUtil = jwtUtil;
     }
     @GetMapping("/users")
     public ResponseEntity<UserContainerDto> getAllUsers(@RequestParam(required = false) String search){
@@ -94,12 +95,13 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public  ResponseEntity<UserDto> updateCurrentUser(@RequestBody @Valid UpdateUserRequest request,
-                                                      @AuthenticationPrincipal User user){
+    public  ResponseEntity<UserWithTokenDto> updateCurrentUser(@RequestBody @Valid UpdateUserRequest request,
+                                                               @AuthenticationPrincipal User user){
 
+        UserDto updatedUser = userService.updateUser(user,request);
+        String token = jwtUtil.generateToken(updatedUser.email());
 
-
-        return ResponseEntity.ok(userService.updateUser(user,request));
+        return ResponseEntity.ok(new UserWithTokenDto(updatedUser,new JwtResponseDto(token)));
     }
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteCurrentUser(@AuthenticationPrincipal User user){

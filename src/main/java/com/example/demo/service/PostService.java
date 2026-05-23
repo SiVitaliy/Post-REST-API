@@ -105,7 +105,7 @@ public class PostService {
 
     public PostDto save(CreatePostRequest request, User user){
         Post post =  postMapper.toEntity(request,user);
-        System.out.println(post.getImages());
+
         return postMapper.toDto(postRepository.save(post));
     }
 
