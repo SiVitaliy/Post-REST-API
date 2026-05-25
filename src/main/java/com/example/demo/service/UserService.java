@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -74,8 +76,10 @@ public class UserService {
     }
 
     public UserContainerDto getAllUsers(String search) {
+
         if (search!=null && !search.isBlank()){
-            return userMapper.toContainerDto(userRepository.findUsersWithSearch(search));
+            String decoded = URLDecoder.decode(search, StandardCharsets.UTF_8);
+            return userMapper.toContainerDto(userRepository.findUsersWithSearch(decoded));
         }
         return userMapper.toContainerDto(userRepository.findAll());
     }

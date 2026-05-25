@@ -61,8 +61,6 @@ public class PostService {
         );
         Page<Post> posts= postRepository.findAllWithAuthor(pageable);
 
-
-
         return new PageResponse<>(
                 posts.getContent().stream().map(postMapper::toDto).collect(Collectors.toList()),
                 posts.getNumber(), posts.getSize(),
